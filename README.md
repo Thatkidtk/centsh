@@ -1,47 +1,88 @@
-# centsh (TUI)
+# centsh — Terminal budgeting with live charts and auto-budgets
+One-screen TUI to log income/expenses, see category spend and cashflow charts, and get monthly budget suggestions from your own history.
 
-Terminal-first budget tracker with live charts, quick input, and auto-budget hints. Data is stored locally in `~/Library/Application Support/centsh/ledger.json` on macOS (XDG data dir elsewhere).
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## Run it locally
-- `cargo run` — launches the TUI with sample data if you have none.
-- Install the binary for the `centsh` command: `cargo install --path .` then run `centsh`.
-- Keys (normal mode): `a` add transaction, `b` add/update budget, `h/l` switch tabs, `s` save, `g` toggle auto-budget hints, `r` reload from disk, `q` quit.
-- Form mode (add transaction/budget): type to edit, `Tab`/`Shift+Tab` to move, `Enter` to advance/submit, `Esc` to cancel.
+## Table of Contents
+- [Overview / Features](#overview--features)
+- [Screenshots / Demo](#screenshots--demo)
+- [Installation](#installation)
+- [Usage Examples](#usage-examples)
+- [Configuration](#configuration)
+- [Project Structure](#project-structure)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
+- [Changelog](#changelog)
 
-### Data conventions
-- Amounts: expenses are positive numbers; income is negative. Net = income − spending.
+## Overview / Features
+- Keyboard-first TUI (tabs for Overview, Transactions, Budgets) with live charts for category spend and monthly cashflow.
+- Quick-add forms for transactions and budgets, plus auto-budget suggestions from the last 90 days of spending.
+- Local JSON storage in your OS data directory (macOS: `~/Library/Application Support/centsh/ledger.json`—XDG on Linux).
+- Sensible sample data on first run so you see charts immediately.
+
+## Screenshots / Demo
+- Run `cargo run` and you’ll see:
+  - Overview: income/spend/net, budgets progress, category bar chart, cashflow line chart.
+  - Transactions: sortable table of recent entries.
+  - Budgets: limits per category plus auto-budget hints (toggle with `g`).
+- Tip: capture a short demo GIF with `asciinema rec` or `terminalizer` and drop it here once ready.
+
+## Installation
+Prerequisites: Rust stable (via `rustup`). macOS/Linux terminal.
+
+Local dev run:
+```bash
+cargo run
+```
+
+Install as the `centsh` command from source:
+```bash
+cargo install --path .
+centsh
+```
+
+Planned Homebrew tap (after publishing a release):
+```bash
+brew tap Thatkidtk/tap
+brew install thatkidtk/tap/centsh
+```
+
+## Usage Examples
+- Launch: `centsh`
+- Normal mode keys: `a` add transaction, `b` add/update budget, `h/l` switch tabs, `s` save, `g` toggle auto-budget hints, `r` reload, `q` quit.
+- Form mode: type to edit fields, `Tab`/`Shift+Tab` to move, `Enter` to advance/submit, `Esc` to cancel.
+- Amount convention: expenses are positive numbers; income is negative. Net = income − spending.
 - Dates: `YYYY-MM-DD` (defaults to today if left blank).
-- Budgets: monthly limits by category. The overview shows % consumed for the current month.
 
-### Auto-budget logic
-Looks at the last 90 days of spending per category, averages to a monthly number, adds a 10% buffer, and proposes a suggested limit. If you have no history yet, it suggests starter categories (Housing, Food, Savings).
+## Configuration
+- Storage path: macOS `~/Library/Application Support/centsh/ledger.json`; Linux/other XDG data dir. Want a custom path? (Future idea: add `CENTSHPATH` environment variable.)
+- Budgets are monthly per category; auto-budget looks at last 90 days spend per category, averages monthly, adds 10% buffer.
 
-## Shipping on macOS/Homebrew
-1) Build a release binary: `cargo build --release` (for universal: `cargo build --release --target aarch64-apple-darwin` and `x86_64-apple-darwin`, then `lipo -create`).
-2) Create a versioned Git tag and GitHub release attaching `centsh` binary (or tarball with binary + README).
-3) Homebrew tap formula sketch:
-   ```ruby
-   class Centsh < Formula
-     desc "Terminal budgeting app with graphs and auto-budgeting"
-     homepage "https://github.com/you/centsh"
-     url "https://github.com/you/centsh/releases/download/v0.1.0/centsh.tar.gz"
-     sha256 "<replace_with_actual>"
-     license "MIT"
+## Project Structure
+```
+src/
+  main.rs       # TUI + input handling
+  models.rs     # Ledger, budgets, transactions, auto-budget logic
+  storage.rs    # JSON persistence in OS data dir
+Cargo.toml      # crate/deps metadata
+```
 
-     def install
-       bin.install "centsh"
-     end
+## Roadmap
+- Editing/deleting transactions; CSV import/export.
+- Configurable data path and theming.
+- Alerts/envelopes when nearing limits; recurring transactions and goals.
+- CI (lint/test) and Homebrew release automation.
 
-     test do
-       system "#{bin}/centsh", "--help"
-     end
-   end
-   ```
-   Then `brew tap you/tap` and `brew install you/tap/centsh`.
+## Contributing
+Issues/PRs welcome. Please run `cargo fmt && cargo clippy --all-targets -- -D warnings && cargo test` before opening a PR. For feature ideas, describe the workflow/use-case first.
 
-## Ideas to extend
-- Editing/deleting transactions, CSV import/export.
-- Envelope-style budgets and alerts when nearing limits.
-- Multi-wallet accounts, recurring transactions, savings goals.
-- Richer charts (stacked categories, cash runway) and configurable themes.
-# centsh
+## License
+MIT. See [LICENSE](LICENSE).
+
+## Acknowledgements
+- Built with [ratatui](https://github.com/ratatui-org/ratatui), [crossterm](https://github.com/crossterm-rs/crossterm), and [chrono](https://github.com/chronotope/chrono).
+
+## Changelog
+- Track releases via Git tags (e.g., `v0.1.0`). Add a `CHANGELOG.md` when versions start shipping via Homebrew.
